@@ -178,71 +178,83 @@ public class App {
 
     }
 
+
     private static void comprarVuelo(Usuario user) {
-        /*
-         * Podemos ir dejando una variable local q vaya llevando los valores, puede ser
-         * una instancia
-         * de boleto, y al final se asigna todo, se puede usar boleto para ir calculando
-         * el precio y etc
-         */
-        Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Por favor ingrese el origen: ");
-        String origen = scanner.nextLine();
+        // Solicitar al usuario el origen del vuelo.
+        prompt("Por favor ingrese el origen: ");
+        String origen = inputS();
 
-        System.out.println("Por favor ingrese el destino: ");
-        String destino = scanner.nextLine();
+        // Solicitar al usuario el destino del vuelo.
+        prompt("Por favor ingrese el destino: ");
+        String destino = inputS();
 
         // Ingrese la cantidad de vuelos a generar?
 
-        // Despues de haber creado el orgien y el destino necesito generar los vuelos y
-        // mostrarlos vuelo/precio por tipo de asiento
-        // Generar - Mostrar vuelos
-        ArrayList<Vuelo> vuelos = Aeropuerto.generarVuelos(5, origen, destino); // Cantidad de vuelos
+        // Generar una lista de n vuelos con el origen y destino proporcionados.
+        ArrayList<Vuelo> vuelos = Vuelo.generarVuelos(5, origen, destino);
 
+        separador();
+        salto();
+
+        // Mostrar información sobre los vuelos generados.
+        identacion("Vuelo - Origen - Destino");
+        salto();
         for (int i = 0; i < vuelos.size(); i++) {
             Vuelo vuelo = vuelos.get(i);
-            // Mostrar y enumerar (En proceso)
-            System.out.println(". . . . .");
-            System.out.println(i);
-            System.out.println(vuelo.getInfo());
+            identacion(vuelo.getInfo(), 2);
         }
 
-        System.out.println("Selecciona por favor el vuelo: ");
-        int indexVuelo = scanner.nextInt();
+        salto();
+        separador();
 
-        // Lee y genera los asientos
+        // Solicitar al usuario que seleccione un vuelo y se selecciona.
+        prompt("Por favor, seleccione el número del vuelo deseado: ");
+        int indexVuelo = inputI();
         Vuelo vuelo = vuelos.get(indexVuelo);
-        vuelo.generarAsientos(3, 5);
 
+        // Generar asientos VIP y económicos para el vuelo seleccionado.
+        vuelo.generarAsientos(3, 5, 100);
+
+        // Crear un boleto para el usuario con el origen, destino y vuelo seleccionados.
         Boleto boleto = new Boleto(origen, destino, user, vuelo);
-        System.out.println("Los tipos de asientos disponibles son los siguientes:");
+        separador();
 
-        // Primero muestra los precios de cada tipo de asiento, luego
-        // Muestra los asientos disponibles y su tipo:
+        // Mostrar los tipos de asientos disponibles y sus precios
+        // System.out.println("Tipos de asientos disponibles:");
 
-        System.out.println("Los asientos disponibles son los siguientes:");
+        // Mostrar información sobre los asientos disponibles en el vuelo.
+        salto();
+        identacion("Asientos disponibles");
+        salto();
         ArrayList<Asiento> asientos = vuelo.getAsientos();
 
         for (Asiento asiento : asientos) {
-            System.out.println(asiento.getInfo());
+            identacion(asiento.getInfo(), 2);
         }
 
-        System.out.println("Seleccione el numero de asiento disponible");
-        int indexAsiento = scanner.nextInt();
+        // Solicitar al usuario que seleccione un número de asiento.
+        salto();
+        prompt("Por favor, seleccione el número del asiento deseado: ");
+        int indexAsiento = inputI();
         Asiento asiento = asientos.get(indexAsiento - 1);
         boleto.setAsiento(asiento);
+
         // Si se selecciona y es valido se prosigue...
+
         // Se muestra una previsualizacion del precio
+        separador();
+        System.out.println("Previsualización del precio: " + boleto.getValor());
+        separador();
+        prompt("¿Desea continuar?");
+        // Si sí, sigue, sino, selecciona otro asiento??
 
-        System.out.println("Desea continuar?");
-        // Si sí, sigue, sino, selecciona otro asiento
+        separador();
 
-        System.out.println("Selecciona si va a añadir equipaje o no");
-        int opcion = scanner.nextInt();
-        // SI la respuesta es si, entonces agrega varios equipajes, sino, no
+        // Preguntar al usuario si desea añadir equipaje.
+        prompt("¿Desea añadir equipaje? (Escriba 1 para Sí, 0 para No)");
+        int opcion = inputI();
 
-        System.out.println("...............");
         if (opcion == 1) {
             // Cada vez q se agrega un equipaje se va mostrando una previsualizacion del
             // precio..
@@ -252,55 +264,252 @@ public class App {
 
             do {
                 c += 1;
-                System.out.println(c);
-                System.out.println("...");
-                System.out.println("> Ingrese el peso de la maleta");
-                int peso = scanner.nextInt();
+                separador();
+                // Solicitar información sobre el equipaje a agregar.
 
-                System.out.println("> Ingrese el valor del ancho de la maleta");
-                int ancho = scanner.nextInt();
+                prompt("Peso de la maleta: ");
+                int peso = inputI();
 
-                System.out.println("> Ingrese el valor del largo de la maleta");
-                int largo = scanner.nextInt();
+                prompt("Ancho de la maleta: ");
+                int ancho = inputI();
 
-                System.out.println("> Ingrese el valor del alto de la maleta");
-                int alto = scanner.nextInt();
+                prompt("Largo de la maleta: ");
+                int largo = inputI();
 
-                boleto.addEquipaje(new Maleta(c, peso, largo, ancho, alto, boleto));
-                System.out.println("Valor nuevo del boleto: ");
+                prompt("Alto de la maleta: ");
+                int alto = inputI();
+
+                // Agregar una maleta al boleto y mostrar el nuevo valor del boleto.
+                Maleta maleta = new Maleta(c, peso, largo, ancho, alto);
+                maleta.asignarBoleto(boleto);
+                boleto.addEquipaje(maleta);
+                separador();
+                System.out.println("Nuevo valor del boleto: ");
                 System.out.println("-> $" + boleto.getValor());
 
-                System.out.println("Desea agregar un equipaje mas o continuar? 1/0");
-                exit = scanner.nextInt();
+                separador();
+                prompt("¿Desea agregar otro equipaje o continuar? (1 para Sí, 0 para No)");
+                exit = inputI();
 
             } while (exit == 1);
         }
 
-        System.out.println("Desea finalizar la compra? los detalles serian:");
-        // Se muestran todos los detalles de la compra y se pide la confirmacion para
-        // pagar
-        System.out.println("Mostrar el detalles");
-        System.out.println(boleto.getInfo());
+        // Mostrar los detalles de la compra y solicitar confirmación.
+        salto();
+        prompt("¿Desea finalizar la compra? Los detalles son los siguientes:");
+        salto();
+        identacion(boleto.getInfo());
 
-        System.out.println("Confirmar, escriba 1/0");
-        int confirmacion = scanner.nextInt();
+        separador();
+        prompt("Confirmar (Escriba 1 para Confirmar, 0 para Cancelar)");
+        int confirmacion = inputI();
 
+        separador();
         if (confirmacion == 1) {
+            // Comprobar si el usuario tiene suficiente dinero y, si es así, realizar la
+            // compra.
             if (user.getDinero() - boleto.getValor() >= 0) {
                 user.comprarBoleto(boleto);
                 boleto.asignarAsiento(asiento);
-                System.out.println("Boleto comprado con exito, detalles:");
+                salto();
+                System.out.println("Boleto comprado con éxito. Detalles:");
+                salto();
+            } else {
+                salto();
+                System.out.println("Dinero insuficiente. Compra cancelada.");
+                salto();
             }
         } else {
-            System.out.println("cancelado ñao ñao");
+            salto();
+            System.out.println("Compra cancelada.");
+            salto();
         }
-        // Si se confirma se efectua el pago y se asigna todo.
-        // --- nota, no se asigna nada hasta q se haya pagado y verificado ---
 
     }
 
     private static void reasignarVuelo(Usuario user) {
-        // Aquí puedes poner el código que deseas ejecutar para la Reasignar vuelo.
+
+        // Obtener el historial de boletos del usuario
+        ArrayList<Boleto> historial = user.getHistorial();
+
+        identacion("Información de los vuelos:");
+        salto();
+
+        // Iterar a través del historial de boletos
+        for (int i = 0; i < historial.size(); i++) {
+            Boleto boleto = historial.get(i);
+            // Mostrar información de cada boleto en la lista
+            identacion(i + ". " + boleto.getInfo(), 2);
+        }
+
+        salto();
+        separador();
+        salto();
+
+        prompt("Por favor, seleccione el número del vuelo deseado: ");
+        int indexVueloTemp = inputI();
+
+        // Obtener el boleto seleccionado por el usuario
+        Boleto boletoSelec = historial.get(indexVueloTemp);
+
+        System.out.println("Vuelo seleccionado, información detallada:");
+        salto();
+        identacion(boletoSelec.getInfo());
+
+        salto();
+        separador();
+        salto();
+
+        prompt("Está seguro de reasignar el vuelo? (Escriba 1 para Confirmar, 0 para Cancelar):");
+        int confirmacionTemp = inputI();
+
+        if (confirmacionTemp == 1) {
+            // Limpiar
+            boletoSelec.resetEquipaje();
+            Asiento asientoPrevio = boletoSelec.getAsiento();
+            asientoPrevio.desasignarBoleto();
+            user.reasignarBoleto(boletoSelec);
+            boletoSelec.resetEquipaje();
+            // - - - - - - - -
+        } else {
+            System.out.println("Proceso cancelado, hasta luego!");
+            return;
+
+        }
+        // Solicitar al usuario el origen del vuelo.
+        String origen = boletoSelec.getOrigen();
+        identacion("Origen: " + origen);
+
+        // Solicitar al usuario el destino del vuelo.
+        String destino = boletoSelec.getDestino();
+        identacion("Destino: " + destino);
+
+        // Ingrese la cantidad de vuelos a generar?
+
+        // Generar una lista de n vuelos con el origen y destino proporcionados.
+        ArrayList<Vuelo> vuelos = Vuelo.generarVuelos(5, origen, destino);
+
+        separador();
+        salto();
+
+        // Mostrar información sobre los vuelos generados.
+        identacion("Vuelo - Origen - Destino");// Por mejorar
+        salto();
+        for (int i = 0; i < vuelos.size(); i++) {
+            Vuelo vuelo = vuelos.get(i);
+            identacion(vuelo.getInfo(), 2);
+        }
+
+        salto(2);
+        separador();
+        salto();
+
+        // Solicitar al usuario que seleccione un vuelo y se selecciona.
+        prompt("Por favor, seleccione el número del vuelo deseado: ");
+        int indexVuelo = inputI();
+        Vuelo vuelo = vuelos.get(indexVuelo);
+
+        // Generar asientos VIP y económicos para el vuelo seleccionado.
+        vuelo.generarAsientos(3, 5, 100);
+
+        // Crear un boleto para el usuario con el origen, destino y vuelo seleccionados.
+        boletoSelec.setVuelo(vuelo);
+        separador();
+
+        // Mostrar los tipos de asientos disponibles y sus precios
+        // System.out.println("Tipos de asientos disponibles:");
+
+        // Mostrar información sobre los asientos disponibles en el vuelo.
+        salto();
+        identacion("Asientos disponibles:");
+        ArrayList<Asiento> asientos = vuelo.getAsientos();
+
+        for (Asiento asiento : asientos) {
+            identacion(asiento.getInfo(), 2);
+        }
+
+        // Solicitar al usuario que seleccione un número de asiento.
+        salto(2);
+        prompt("Por favor, seleccione el número del asiento deseado: ");
+        int indexAsiento = inputI();
+        Asiento asiento = asientos.get(indexAsiento - 1);
+        boletoSelec.reasignarAsiento(asiento);
+
+        // Si se selecciona y es valido se prosigue...
+
+        // Se muestra una previsualizacion del precio
+        separador();
+        System.out.println(
+                "Previsualización del precio: " + boletoSelec.getValor() + " ,se agregará un recargo extra del 10%");
+        separador();
+
+        // Preguntar al usuario si desea añadir equipaje.
+        prompt("¿Desea añadir equipaje? (Escriba 1 para Sí, 0 para No)");
+        int opcion = inputI();
+
+        if (opcion == 1) {
+            // Cada vez q se agrega un equipaje se va mostrando una previsualizacion del
+            // precio..
+            // Segun la cantidad de equipaje y los precios de cada uni
+            int exit = 1;
+            int c = 0;
+
+            do {
+                c += 1;
+                separador();
+                // Solicitar información sobre el equipaje a agregar.
+
+                prompt("Peso de la maleta: ");
+                int peso = inputI();
+
+                prompt("Ancho de la maleta: ");
+                int ancho = inputI();
+
+                prompt("Largo de la maleta: ");
+                int largo = inputI();
+
+                prompt("Alto de la maleta: ");
+                int alto = inputI();
+
+                // Agregar una maleta al boleto y mostrar el nuevo valor del boleto.
+                Maleta maleta = new Maleta(c, peso, largo, ancho, alto);
+                maleta.asignarBoleto(boletoSelec);
+                boletoSelec.addEquipaje(maleta);
+
+                System.out.println("Nuevo valor del boleto: ");
+                identacion("-> $" + boletoSelec.getValor());
+
+                separador();
+                prompt("¿Desea agregar otro equipaje o continuar? (1 para Sí, 0 para No)");
+                exit = inputI();
+
+            } while (exit == 1);
+        }
+
+        // Mostrar los detalles de la compra y solicitar confirmación.
+        prompt("¿Desea finalizar la compra? Los detalles son los siguientes:");
+        identacion(boletoSelec.getInfo());
+
+        separador();
+        prompt("Confirmar (Escriba 1 para Confirmar, 0 para Cancelar)");
+        int confirmacion = inputI();
+
+        separador();
+        if (confirmacion == 1) {
+            // Comprobar si el usuario tiene suficiente dinero y, si es así, realizar la
+            // compra.
+            if (user.getDinero() - boletoSelec.getValor() >= 0) {
+                user.comprarBoleto(boletoSelec);
+                boletoSelec.setStatus("Reasignado");
+                boletoSelec.asignarAsiento(asiento);
+                System.out.println("Boleto comprado con éxito. Detalles:");
+            } else {
+                System.out.println("Dinero insuficiente. Compra cancelada.");
+            }
+        } else {
+            System.out.println("Compra cancelada.");
+        }
+
     }
 
     private static void cancelarVuelo(Usuario user) {
