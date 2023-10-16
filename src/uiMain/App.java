@@ -1,11 +1,9 @@
 package uiMain;
 
-import java.util.Scanner;
-
 import gestorAplicacion.Aerolinea.*;
-import gestorAplicacion.Cuenta.GestionUsuario;
-import gestorAplicacion.Cuenta.Usuario;
+import gestorAplicacion.Cuenta.*;
 
+import java.util.Scanner;
 import java.util.ArrayList;
 
 public class App {
@@ -177,7 +175,6 @@ public class App {
         } while (true);
 
     }
-
 
     private static void comprarVuelo(Usuario user) {
 
@@ -513,10 +510,274 @@ public class App {
     }
 
     private static void cancelarVuelo(Usuario user) {
-        // Aquí puedes poner el código que deseas ejecutar para la Cancelar vuelo.
+        // Mostrar la lista de vuelos
+        // Seleccionar el vuelo
+        // Cancelarlo (Se modifica el boleto y se cambian los valores)
+
+        // Obtener el historial de boletos del usuario
+        ArrayList<Boleto> historial = user.getHistorial();
+
+        identacion("Información de los vuelos:");
+        salto();
+
+        // Iterar a través del historial de boletos
+        for (int i = 0; i < historial.size(); i++) {
+            Boleto boleto = historial.get(i);
+            // Mostrar información de cada boleto en la lista
+            identacion(i + ". " + boleto.getInfo(), 2);
+        }
+
+        salto();
+        separador();
+        salto();
+
+        prompt("Por favor, seleccione el número del vuelo deseado: ");
+        int indexVuelo = inputI();
+
+        // Obtener el boleto seleccionado por el usuario
+        Boleto boleto = historial.get(indexVuelo);
+
+        separador();
+        System.out.println("Vuelo seleccionado, información detallada:");
+        salto();
+        identacion(boleto.getInfo());
+
+        separador();
+
+        prompt("Confirmar la cancelación (Escriba 1 para Confirmar, 0 para Cancelar):");
+        int confirmacion = inputI();
+
+        separadorGrande();
+        salto();
+
+        if (confirmacion == 1) {
+            // Realizar la cancelación del boleto
+            boleto.setStatus("Cancelado");
+            user.cancelarBoleto(boleto);
+            Asiento asiento = boleto.getAsiento();
+            asiento.desasignarBoleto();
+            // Informar al usuario sobre la cancelación exitosa
+            System.out.println("La cancelación se ha realizado con éxito.");
+            salto();
+        }
+
     }
 
-    private static void verCuenta(Usuario user) {
-        // Aquí puedes poner el código que deseas ejecutar para la Ver cuenta.
+    private static void gestionCuenta(Usuario user) {
+        ArrayList<Boleto> historial = user.getHistorial();
+
+        // Ver cuenta.
+        separadorGrande();
+        salto();
+        prompt("¿Qué desea hacer?");
+        salto();
+        /*
+         * Cerrar sesion e iniciar con una nueva
+         * volver al menu
+         * canjear millas
+         * Check in
+         */
+
+        int opcion;
+        do {
+
+            // System.out.println("Menu");
+            identacion("1. Ver informacion de la cuenta");
+            identacion("2. Ver historial de vuelos");
+            identacion("3. Hacer check-in");
+            identacion("4. Canjear millas");
+            identacion("5. Cerrar sesión");
+            identacion("6. Volver al menú anterior");
+            salto();
+            prompt("> Seleccione una opción (1-6): ");
+            opcion = inputI();
+            salto();
+
+            // Imprimir las opciones
+
+            switch (opcion) {
+                case 1:
+                    // Ver informacion general de la cuenta
+                    System.out.println("Estado de la cuenta");
+                    salto();
+                    separadorGrande();
+                    salto();
+                    System.out.println(user.getInfo());
+
+
+                    salto();
+
+                    break;
+
+                case 2:
+                    // Ver historial de vuelos y visualizar informacion (Casi Listo)
+                    identacion("Información de los vuelos:");
+
+                    // Iterar a través del historial de boletos
+                    for (int i = 0; i < historial.size(); i++) {
+                        Boleto boleto = historial.get(i);
+                        // Mostrar información de cada boleto en la lista
+                        identacion(i + ". " + boleto.getInfo(), 2);
+                    }
+
+                    break;
+
+                case 3:
+                    // hacer check-in
+
+                    break;
+
+                case 4:
+                    // Canjear millas
+                    System.out.println("Canjear millas");
+                    System.out.println("En este momento ustede posee n millas que equivalen a:");
+                    System.out.println("Desea confirmar?");
+                    System.out.println("Canjeado con éxito, n millas a m dinero, cuenta total: total");
+
+                    break;
+
+                case 5:
+                    // Cerrar sesion (Listo)
+                    aviso("Cerrando sesión");
+                    salto();
+                    user = gestionUsuario.cerrarSesion(user);
+                    opcion = 6;
+                    break;
+
+                case 6:
+                    //Volver al menu (Listo)
+                    salto();
+                    aviso("¡Volviendo al menu!");
+                    salto();
+                    break;
+
+                default:
+                    System.out.println("Opción incorrecta");
+                    break;
+            }
+
+        } while (opcion != 6);
     }
+
+    private static void checkin(Usuario user) {
+        // Mostrar la lista de vuelos
+        // Seleccionar el vuelo
+        // Cancelarlo (Se modifica el boleto y se cambian los valores)
+
+        // Obtener el historial de boletos del usuario
+        ArrayList<Boleto> historial = user.getHistorial();
+
+        System.out.println("Información de los vuelos:");
+
+        // Iterar a través del historial de boletos
+        for (int i = 0; i < historial.size(); i++) {
+            Boleto boleto = historial.get(i);
+            // Mostrar información de cada boleto en la lista
+            System.out.println(i + " - " + boleto.getInfo());
+        }
+
+        separador();
+
+        System.out.println("Por favor, seleccione el número del vuelo deseado: ");
+        int indexVuelo = inputI();
+
+        // Obtener el boleto seleccionado por el usuario
+        Boleto boleto = historial.get(indexVuelo);
+
+        System.out.println("Vuelo seleccionado, información detallada:");
+        System.out.println(boleto.getInfo());
+
+        separador();
+
+        System.out.println("Confirma el check-in? (Escriba 1 para Confirmar, 0 para Cancelar):");
+        int confirmacion = inputI();
+
+        separador();
+
+        if (confirmacion == 1) {
+            // Realizar la cancelación del boleto
+            boleto.setStatus("Confirmado");
+
+            // Informar al usuario sobre la cancelación exitosa
+            System.out.println("Realizado con éxito.");
+        } else {
+            return;
+        }
+
+        //Despues de hacer el check in se le da al usuario la opcion de agregar mas cosas
+        
+        //Alimentacion: menu de compas
+        // Definir productos y precios
+        //mostrar informacion de confirmacion
+
+        
+        //Upgrate de asiento
+
+
+
+
+    }
+
+    // Estetica
+    private static void separador() {
+        System.out.println("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _");
+    }
+
+    private static void separadorGrande() {
+        System.out.println("+ = = = = = = = = = = = = = = = = = = = = = = = +");
+    }
+
+    private static void salto() {
+        System.out.print("\n");
+    }
+
+    private static void salto(int n) {
+        for (int i = 0; i < n; i++) {
+            System.out.print("\n");
+        }
+    }
+
+    private static void aviso(String text) {
+        System.out.println("> > > " + text + " < < <");
+    }
+
+    private static void identacion(String text, int n) {
+        String cadena = "";
+        for (int i = 0; i < n; i++) {
+            cadena += "    ";
+        }
+        System.out.println(cadena + text);
+    }
+
+    private static void identacion(String text) {
+        System.out.println("    " + text);
+    }
+
+    private static void titulo(String text) {
+        System.out.println("# = = = " + text + " = = = #");
+    }
+
+    private static void prompt(String text) {
+        System.out.println("> " + text);
+    }
+
+    private static String inputS() {
+        System.out.print("  > ");
+        Scanner scanner = new Scanner(System.in);
+        String s = scanner.nextLine();
+        // scanner.close();
+        return s;
+    }
+
+    private static int inputI() {
+        System.out.print("  > ");
+        Scanner scanner = new Scanner(System.in);
+        int n = scanner.nextInt();
+        // scanner.close();
+        return n;
+    }
+
 }
+
+
+//SI el usuario ya hizo check in no puede reasignar, solo cancelar y se pierde
