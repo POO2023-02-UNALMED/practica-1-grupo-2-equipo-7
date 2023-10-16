@@ -1,9 +1,10 @@
-package Aerolinea;
+package gestorAplicacion.Aerolinea;
 
 import java.io.Serializable;
-import Aerolinea.Maleta;
-import Aerolinea.Usuario;
 import java.util.ArrayList;
+
+import gestorAplicacion.Aerolinea.Maleta;
+import gestorAplicacion.Cuenta.Usuario;
 
 public class Pasajero {
     private static final long serialVersionUID = 0;

@@ -1,11 +1,13 @@
-package Aerolinea;
+package gestorAplicacion.Cuenta;
 
 import java.io.Serializable;
-import Aerolinea.Boleto;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+
+import gestorAplicacion.Aerolinea.Boleto;
+import gestorAplicacion.Aerolinea.Maleta;
 
 public class GestionUsuario{
     Scanner scanner = new Scanner(System.in);

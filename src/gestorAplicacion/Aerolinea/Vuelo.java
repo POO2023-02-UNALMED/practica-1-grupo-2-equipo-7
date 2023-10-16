@@ -1,4 +1,4 @@
-package Aerolinea;
+package gestorAplicacion.Aerolinea;
 
 import java.io.Serializable;// clase para serializar
 import java.util.ArrayList;
@@ -25,24 +25,37 @@ public class Vuelo implements Serializable { // se crea la clase e implementa se
 		this.ORIGEN = origen;
 	}
 
-	public void generarAsientos(int economicos, int premium) {
+	public static ArrayList<Vuelo> generarVuelos(int cantidad, String origen, String destino) {
+
+        ArrayList<Vuelo> vuelos = new ArrayList<>();
+
+        for (int i = 0; i < cantidad; i++) {
+            // Generar vuelos y meterlos al array, devueve al array y puede mostrarse
+            // Generar aleatoriamente
+            String aerolinea = "Latam";
+            String id = Integer.toString(i);
+            String hSalida = "69:69";
+            String hLlegada = "";
+            vuelos.add(new Vuelo(origen, destino, aerolinea, id, hSalida, hLlegada));
+        }
+        return vuelos;
+    }
+
+	public void generarAsientos(int economicos, int premium, float base) {
 		/*
 		 * Dependiendo de la cantidad que se le pase, genera n asientos de tipo vip y
 		 * j asientos de tipo economico
 		 */
 
 		for (int i = 1; i <= premium; i++) {
-			this.asientos.add(new Asiento("Vip", i, 100));
+			this.asientos.add(new Asiento("Vip", i, (float)(base*1.25)));
 		}
 		for (int j = premium+1; j <= premium + economicos; j++) {
-			this.asientos.add(new Asiento("Economico", j, 100));
+			this.asientos.add(new Asiento("Economico", j, base));
 		}
 	}
 
 	public String getOrigenDestino() {
-		/*
-		 * Regresa como string la informacion de origen - destino
-		 */
 		return this.ORIGEN + " - " + this.DESTINO;
 	}
 
@@ -50,7 +63,7 @@ public class Vuelo implements Serializable { // se crea la clase e implementa se
 		/*
 		 * Regresa como string la informacion de origen - destino
 		 */
-		String info = this.ID + ". " + this.ORIGEN + " - " + this.DESTINO;
+		String info = "Id: " + this.ID + ", Origen: " + this.ORIGEN + ", Destino: " + this.DESTINO;
 		return info;
 	}
 

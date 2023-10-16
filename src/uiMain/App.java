@@ -1,7 +1,10 @@
-package appUI;
+package uiMain;
 
-import Aerolinea.*;
 import java.util.Scanner;
+
+import gestorAplicacion.Aerolinea.*;
+import gestorAplicacion.Cuenta.Usuario;
+
 import java.util.ArrayList;
 
 public class App {
