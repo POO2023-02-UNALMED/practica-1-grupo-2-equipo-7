@@ -2,104 +2,100 @@ package gestorAplicacion.Cuenta;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
 
-import gestorAplicacion.Aerolinea.Boleto;
-import gestorAplicacion.Aerolinea.Maleta;
+import gestorAplicacion.Aerolinea.*;
 
-public class GestionUsuario{
-    Scanner scanner = new Scanner(System.in);
-    private Usuario user;
-    private ArrayList<Usuario> Usuarios = new ArrayList<Usuario>();
-    //inventario de maletas
-    protected static Map<Integer,Maleta> inventarioMaletas = new HashMap<>();
+public class GestionUsuario {
 
-    public GestionUsuario(){
+    public ArrayList<Usuario> Usuarios = new ArrayList<>();
+    public Usuario user = null;
+    public ArrayList<Maleta> inventarioMaletas = new ArrayList<>();
 
-    }
-    public Boolean registrarUsuario(Usuario user){
-        //Verificar si el correo electrónico y id están registrados
-        for (Usuario usuario: Usuarios){
-            if (usuario.getCorreo_electronico().equals(user.getCorreo_electronico())){
-                System.out.println("Este correo electrónico ya está registrado" );
-                return false;
-            }
-            if (usuario.getId().equals(user.getId())){
-                System.out.println("Este id ya está registrado" );
-                return false;
-            }
-        }
-        //Si no está registrado, agregar el nuevo user
+    public GestionUsuario() {
+        Usuario user = new Usuario("largo", "admin", "123", 0);
+        user.setDinero(1000);
+        user.setMillas(120);
         Usuarios.add(user);
-        System.out.println("Registro exitoso");
-        return true;
     }
-    public String cambiarContrasena(Usuario user){
-        String newContrasena;
-        String confirContrasena;
-        do {
-        System.out.print("Nueva contraseña: ");
-        newContrasena = scanner.nextLine();
-        System.out.println("Confirmar contraseña: ");
-        confirContrasena = scanner.nextLine();
-        if (!newContrasena.equals(confirContrasena)){
-            System.out.println("Las contraseñas no coinciden, por favor inténtelo de nuevo");
-        }
-    } while(!newContrasena.equals(confirContrasena));
-    user.setContrasena(newContrasena);
-    return user.getContrasena();
-    }
-    public Usuario iniciarSesion(String correo_electronico,String id,String contrasena){
-        for(Usuario usuario : Usuarios){
-            if (usuario.getCorreo_electronico().equals(correo_electronico) && (usuario.getId().equals(id)) && usuario.getContrasena().equals(contrasena)) {
-                System.out.println("Inicio de sesión exitoso");
+
+    public Usuario iniciarSesion(String mail, String contrasena) {
+        for (Usuario usuario : Usuarios) {
+            if (usuario.getMail().equals(mail) && usuario.verificarContrasena(contrasena)) {
+                this.user = usuario;
                 return usuario;
             }
         }
-        System.out.println("Datos incorrectos");
         return null;
     }
-    //Rastrear maleta por ID
-    public String rastreoMaleta(int id){
-        Maleta maleta = GestionUsuario.inventarioMaletas.get(id);
-        if (maleta != null) {
-            return "Estado de la maleta con Id( "+id+") y a nombre de ("+maleta.getPasajero().getNombre()+"): "+ maleta.getEstado();
-        } else {
-            return "Maleta no encontrada";
+
+    public Usuario registrarUsuario(String nombre, String correo, String contrasena) {
+        // Verificar si el correo electrónico y id están registrados
+        for (Usuario usuario : Usuarios) {
+            if (usuario.getMail().equals(correo)) {
+                return null;
+            }
         }
-    }
-    
-    public Scanner getScanner() {
-        return this.scanner;
+        // Si no está registrado, agregar el nuevo user
+        Usuario usuario = new Usuario(nombre, correo, contrasena, 1);
+        Usuarios.add(usuario);
+        this.user = usuario;
+        return usuario;
     }
 
-    public void setScanner(Scanner scanner) {
-        this.scanner = scanner;
+    public Usuario cambiarContrasena(Usuario usuario, String contrasena, String nuevaContrasena) {
+
+        if (usuario.verificarContrasena(contrasena)) {
+            usuario.setContrasena(nuevaContrasena);
+            return usuario;
+        } else {
+            return null;
+        }
     }
 
     public Usuario getUser() {
         return this.user;
     }
 
-    public void setUser(Usuario user) {
-        this.user = user;
+    public Usuario cerrarSesion(Usuario user) {
+        this.user = null;
+        return null;
     }
 
-    public ArrayList<Usuario> getUsuarios() {
-        return this.Usuarios;
-    }
+    
 
-    public void setUsuarios(ArrayList<Usuario> Usuarios) {
-        this.Usuarios = Usuarios;
-    }
-    public Map<Integer,Maleta> getInventarioMaletas() {
-        return GestionUsuario.inventarioMaletas;
-    }
+    // Rastrear maleta por ID
+    public String rastrearMaleta(int tipo, int value) {
 
-    public void setInventarioMaletas(Map<Integer,Maleta> inventarioMaletas) {
-        GestionUsuario.inventarioMaletas = inventarioMaletas;
-    }
+        switch (tipo) {
+            case 1:
+                // Rastreo por id de la maleta
+                // Por cada boleto que tiene asociado un vuelo encuentra el asiento y las
+                // maletas asociadas y tambien da informacion
+                Boleto encontrado = null;
+                for (Boleto boleto : this.user.getHistorial()) {
+                    for (Maleta maleta : boleto.getEquipaje()) {
+                        if (maleta.getId() == value) {
+                            encontrado = boleto;
+                            return "La maleta se encuentra en el vuelo X con info";
+                        }
+                    }
+                }
+                Asiento asiento = encontrado.getAsiento();
 
+                break;
+
+            case 2:
+                // Rastreo de maleta en un vuelo
+                break;
+
+            case 3:
+                // Tipo de equipaje
+                break;
+
+            default:
+                break;
+        }
+
+        return null;
+    }
 }
