@@ -1,41 +1,43 @@
 package gestorAplicacion.Aerolinea;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.*;
 
 import gestorAplicacion.Aerolinea.*;
-import gestorAplicacion.Cuenta.GestionUsuario;
-import gestorAplicacion.Cuenta.Usuario;
+import gestorAplicacion.Cuenta.*;
 
 public class Boleto implements Serializable {
     private static final long serialVersionUID = 0;
 
-    private String id;
+    private static int cont = 0;
+    private int id;
     private String tipo;
     private Usuario user;
-    private String status = "Comprado";
+    private String status = "Pendiente";
     private String origen;
     private String destino;
 
-    private int valor;
+    private float valor;
 
     private ArrayList<Maleta> equipaje = new ArrayList<>();
     private Asiento asiento;
     private Pasajero pasajero;
-    
-    //...precios
-    private int valorInicial;
-    private int valorEquipaje;
-    //precios...
+
+    // ...precios
+    private float valorInicial;
+    private float valorEquipaje;
+    // precios...
 
     private Vuelo vuelo;
 
-    public Boleto (String origen, String destino, Usuario propietario, Vuelo vuelo) {
+    public Boleto(String origen, String destino, Usuario propietario, Vuelo vuelo) {
+        cont++;
         this.origen = origen;
         this.destino = destino;
         this.user = propietario;
         this.vuelo = vuelo;
         this.pasajero = new Pasajero(propietario, this);
+        this.id = cont;
     }
 
     public void updateValor() {
@@ -44,20 +46,29 @@ public class Boleto implements Serializable {
             temp += maleta.calcularPrecio();
         }
         this.valorEquipaje = temp;
-        this.valor = this.valorInicial + this.valorEquipaje;
+        this.valor = this.valorInicial + temp;
     }
 
-
     public void asignarAsiento(Asiento asiento) {
-        this.asiento = asiento;
         asiento.asignarBoleto(this);
+    }
+
+    public void setAsiento(Asiento asiento) {
+        this.asiento = asiento;
         this.valorInicial = asiento.getValor();
+        this.valor = valorInicial;
+        this.tipo = asiento.getTipo();
+    }
+
+    public void reasignarAsiento(Asiento asiento) {
+        this.asiento = asiento;
+        this.valorInicial = asiento.getValor() * (float) (asiento.getValor() * 0.1);
+        this.valor = valorInicial;
         this.tipo = asiento.getTipo();
     }
 
     public void resetEquipaje() {
         this.equipaje = null;
-        this.valor = 0;
     }
 
     public String getOrigenDestino() {
@@ -67,21 +78,20 @@ public class Boleto implements Serializable {
     public void addEquipaje(Maleta maleta) {
         this.equipaje.add(maleta);
         this.updateValor();
-        GestionUsuario.inventarioMaletas.put(maleta.getId(),maleta);
     }
+
     public String getInfo() {
-        return "Precio: " + this.valor +  ", Tipo: " + this.tipo + ", Numero de asiento: " + this.asiento.getN_silla() + "...";
+        return "Precio: " + this.valor + ", Tipo: " + this.tipo + ", Numero de asiento: " + this.asiento.getN_silla()
+                + ", Estado: " + this.status;
     }
 
+    // ...Metodos get y set...
 
-    //...Metodos get y set...
-
-
-    public String getId() {
+    public int getId() {
         return this.id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -125,11 +135,11 @@ public class Boleto implements Serializable {
         this.destino = destino;
     }
 
-    public int getValor() {
+    public float getValor() {
         return this.valor;
     }
 
-    public void setValor(int valor) {
+    public void setValor(float valor) {
         this.valor = valor;
     }
 
@@ -145,11 +155,6 @@ public class Boleto implements Serializable {
         return this.asiento;
     }
 
-    public void setAsiento(Asiento asiento) {
-        this.asiento = asiento;
-        this.valorInicial = asiento.getValor();
-        this.tipo = asiento.getTipo();
-    }
 
     public Pasajero getPasajero() {
         return this.pasajero;
@@ -159,19 +164,19 @@ public class Boleto implements Serializable {
         this.pasajero = pasajero;
     }
 
-    public int getValorInicial() {
+    public float getValorInicial() {
         return this.valorInicial;
     }
 
-    public void setValorInicial(int valorInicial) {
+    public void setValorInicial(float valorInicial) {
         this.valorInicial = valorInicial;
     }
 
-    public int getValorEquipaje() {
+    public float getValorEquipaje() {
         return this.valorEquipaje;
     }
 
-    public void setValorEquipaje(int valorEquipaje) {
+    public void setValorEquipaje(float valorEquipaje) {
         this.valorEquipaje = valorEquipaje;
     }
 
@@ -182,6 +187,5 @@ public class Boleto implements Serializable {
     public void setVuelo(Vuelo vuelo) {
         this.vuelo = vuelo;
     }
-
 
 }
