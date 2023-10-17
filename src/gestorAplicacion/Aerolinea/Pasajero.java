@@ -1,10 +1,11 @@
 package gestorAplicacion.Aerolinea;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 import gestorAplicacion.Aerolinea.Maleta;
-import gestorAplicacion.Cuenta.Usuario;
+import gestorAplicacion.Cuenta.*;
+
+import java.util.ArrayList;
 
 public class Pasajero {
     private static final long serialVersionUID = 0;
@@ -13,15 +14,12 @@ public class Pasajero {
     private Usuario user;
     private Boleto boleto;
 
-    private boolean trabajador;
-
-
     public Pasajero(Usuario user, Boleto boleto) {
         this.nombre = user.getNombre();
         this.boleto = boleto;
     }
 
-    //...Metodos get y set...
+    // ...Metodos get y set...
 
     public String getNombre() {
         return this.nombre;
@@ -46,18 +44,4 @@ public class Pasajero {
     public void setBoleto(Boleto boleto) {
         this.boleto = boleto;
     }
-
-    public boolean isTrabajador() {
-        return this.trabajador;
-    }
-
-    public boolean getTrabajador() {
-        return this.trabajador;
-    }
-
-    public void setTrabajador(boolean trabajador) {
-        this.trabajador = trabajador;
-    }
-
-
 }
