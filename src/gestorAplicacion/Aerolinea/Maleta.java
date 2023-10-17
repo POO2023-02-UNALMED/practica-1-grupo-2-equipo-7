@@ -3,6 +3,8 @@ package gestorAplicacion.Aerolinea;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import gestorAplicacion.Cuenta.*;
+
 public class Maleta implements Serializable {
 
     private final static long serialVersionUID = 0;
@@ -19,23 +21,27 @@ public class Maleta implements Serializable {
     private String destino_origen;
     private String estado;
 
-    public Maleta(int id, int peso, int largo, int ancho, int alto, Boleto boleto) {
+    public Maleta(int id, int peso, int largo, int ancho, int alto) {
         this.id = id;
         this.peso = peso;
         this.largo = largo;
         this.ancho = ancho;
         this.alto = alto;
+    }
+
+    public int calcularPrecio() {
+        return ((this.peso + ((this.alto * this.ancho * this.largo) / 5)) / 2) + 5; // Crear formula para calcular el
+                                                                                    // valor total con respecto al peso,
+                                                                                    // largo y alto
+    }
+
+    public void asignarBoleto(Boleto boleto) {
         this.boleto = boleto;
         this.pasajero = boleto.getPasajero();
         this.destino_origen = boleto.getOrigenDestino();
     }
 
-    public int calcularPrecio() {
-        return (1/2) * (this.peso + ((this.alto * this.ancho * this.largo) / 10)) + 5; // Crear formula para calcular el valor total con respecto al peso, largo y alto
-    }
-
-
-    //...Metodos get y set...
+    // ...Metodos get y set...
 
     public int getId() {
         return this.id;
@@ -100,6 +106,7 @@ public class Maleta implements Serializable {
     public void setDestino_origen(String destino_origen) {
         this.destino_origen = destino_origen;
     }
+
     public String getEstado() {
         return this.estado;
     }
@@ -107,5 +114,6 @@ public class Maleta implements Serializable {
     public void setEstado(String estado) {
         this.estado = estado;
     }
+
 
 }
