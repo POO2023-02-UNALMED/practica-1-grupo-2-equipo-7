@@ -8,10 +8,11 @@ public class Asiento {
     private Pasajero pasajero;
     private int n_silla;
     private boolean disponible = true;
+    private String status = "Disponible";
     private Boleto boleto;
-    private int valor;
+    private final float valor;
 
-    public Asiento(String tipo, int n_silla, int valor) {
+    public Asiento(String tipo, int n_silla, float valor) {
         this.tipo = tipo;
         this.n_silla = n_silla;
         this.valor = valor;
@@ -23,12 +24,18 @@ public class Asiento {
         this.disponible = false;
     }
 
-    public String getInfo() {
-        return n_silla + " - " + tipo + ", $" + valor ; //Muestra la info del asiento
+    public void desasignarBoleto() {
+        this.boleto = null;
+        this.pasajero = null;
+        this.disponible = false;
     }
 
+    public String getInfo() {
+        return n_silla + ". Tipo: " + tipo + ", Valor: $" + valor; // Muestra la info del asiento
+    }
 
-    //...Metodos get y set...
+    // ...Metodos get y set...
+
 
     public String getTipo() {
         return this.tipo;
@@ -66,6 +73,14 @@ public class Asiento {
         this.disponible = disponible;
     }
 
+    public String getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public Boleto getBoleto() {
         return this.boleto;
     }
@@ -74,13 +89,10 @@ public class Asiento {
         this.boleto = boleto;
     }
 
-    public int getValor() {
+    public float getValor() {
         return this.valor;
     }
 
-    public void setValor(int valor) {
-        this.valor = valor;
-    }
-
+  
 
 }
