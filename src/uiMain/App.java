@@ -781,3 +781,4 @@ public class App {
 
 
 //SI el usuario ya hizo check in no puede reasignar, solo cancelar y se pierde
+//test
