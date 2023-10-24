@@ -1041,7 +1041,111 @@ public class App {
         } else {
             promptError("Compra cancelada.");
         }
+            
+    }
+        private static void gestionCuenta(Usuario user) {
+        ArrayList<Boleto> historial = user.getHistorial();
 
+        int opcion;
+        do {
+
+            // Ver cuenta.
+            separadorGrande();
+
+            promptOut("¿Qué desea hacer?");
+            salto();
+
+            // System.out.println("Menu");
+            identacion("1. Ver informacion de la cuenta");
+            identacion("2. Ver historial de vuelos");
+            identacion("3. Depositar dinero");
+            identacion("4. Canjear millas");
+            identacion("5. Cerrar sesión");
+            identacion("6. Volver al menú anterior");
+            salto();
+
+            promptIn("> Seleccione una opción (1-6):");
+            opcion = inputI();
+            salto();
+
+            // Imprimir las opciones
+
+            switch (opcion) {
+                case 1:
+                    // Ver informacion general de la cuenta
+                    separador();
+                    identacion(negrita(colorTexto("Estado de la cuenta", "morado")), 4);
+                    separadorGrande();
+                    System.out.println(user.getInfo());
+                    separadorGrande();
+                    continuar();
+                    salto();
+                    break;
+
+                case 2:
+                    separador();
+                    // Ver historial de vuelos y visualizar informacion (Casi Listo)
+                    salto();
+
+                    System.out.println(negrita(colorTexto("Información de los vuelos:", "morado")));
+                    salto();
+
+                    // Iterar a través del historial de boletos
+                    for (int i = 0; i < historial.size(); i++) {
+                        Boleto boleto = historial.get(i);
+                        // Mostrar información de cada boleto en la lista
+                        identacion(i + ". " + boleto.getInfo());
+                    }
+
+                    salto();
+                    continuar();
+                    salto();
+
+                    break;
+
+                case 3:
+                    // Depositar dinero
+                    promptOut("Ingrese el valor que desea depositar: ");
+                    int valor = inputI();
+                    user.depositarDinero(valor);
+
+                    salto();
+                    System.out.println(colorTexto("Transaccion realizada con exito", "verde"));
+
+                    separador();
+                    break;
+
+                case 4:
+                    // Canjear millas
+                    canjearMillas(user);
+
+                    salto();
+                    break;
+
+                case 5:
+                    // Cerrar sesion (Listo)
+                    aviso(colorTexto("Cerrando sesión", "rojo"));
+                    salto();
+                    user = gestionUsuario.cerrarSesion(user);
+                    opcion = 6;
+                    salto();
+                    break;
+
+                case 6:
+                    // Volver al menu (Listo)
+                    salto();
+                    aviso(colorTexto("¡Volviendo al menu!", "verde"));
+                    salto();
+                    break;
+
+                default:
+                    aviso(colorTexto("Opción incorrecta", "rojo"));
+                    salto();
+
+                    break;
+            }
+
+        } while (opcion != 6);
     }
 
 
