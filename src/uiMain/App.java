@@ -1147,6 +1147,102 @@ public class App {
 
         } while (opcion != 6);
     }
+       private static void contratarAcompanante(Boleto boleto, Usuario user) {
+        promptOut("Desea contratar un acompañante para el pasajero menor de edad? Esto tiene un costo de $15");
+
+        switch (confirmarTransaccion(user, ServiciosEspeciales.ACOMPANANTE_PARA_MENOR.getPrecio())) {
+            case 1:
+                // anade a el servicio a la lista del boleto
+                boleto.anadirServiciosEspeciales(ServiciosEspeciales.ACOMPANANTE_PARA_MENOR);
+                // realiza el pago del servicio
+                boleto.getUser().realizarPago(ServiciosEspeciales.ACOMPANANTE_PARA_MENOR.getPrecio());
+
+                separador();
+                printNegrita(colorTexto("Asignado con exito ✔", "verde"));
+                salto();
+                continuar();
+                break;
+
+            case -1:
+                promptError("Dinero insuficiente, compra cancelada");
+                break;
+
+            case 0:
+                promptError("Cancelado");
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private static void contratarTrasporteTerrestre(Boleto boleto, Usuario user) {
+        promptOut("Desea contratar el servicio de transporte terrestre? Esto tiene un costo de $70");
+
+        switch (confirmarTransaccion(user, ServiciosEspeciales.TRANSPORTE_TERRESTRE.getPrecio())) {
+            case 1:
+                // anade a el servicio a la lista del boleto
+                boleto.anadirServiciosEspeciales(ServiciosEspeciales.TRANSPORTE_TERRESTRE);
+                // realiza el pago del servicio
+                boleto.getUser().realizarPago(ServiciosEspeciales.TRANSPORTE_TERRESTRE.getPrecio());
+
+                separador();
+                printNegrita(colorTexto("Compra realizada con exito!", "verde"));
+                salto();
+                continuar();
+                break;
+
+            case -1:
+                promptError("Dinero insuficiente, compra cancelada");
+                break;
+
+            case 0:
+                promptError("Cancelado");
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private static void verServiciosContratados(Boleto boleto) {
+        if (boleto.getServiciosContratados().size() != 0) {
+            System.out.println(colorTexto(("Usted tiene los siguientes servicios contratados"), "morado"));
+            salto();
+            int index = 0;
+            for (ServiciosEspeciales servicio : boleto.getServiciosContratados()) {
+                identacion(negrita("Servicio: ") + servicio.getServicio() + " por un valor de: $"
+                        + colorTexto("" + servicio.getPrecio(), "verde"));
+                if (servicio == ServiciosEspeciales.MASCOTA_EN_CABINA
+                        || servicio == ServiciosEspeciales.MASCOTA_EN_BODEGA) {
+                    System.out.println("	-" + boleto.getMascotas().get(index));
+                }
+            }
+
+            continuar();
+        } else {
+            System.out.println(colorTexto("No tiene servicios contratados", "morado"));
+
+            continuar();
+        }
+    }
+
+    private static int confirmarTransaccion(Usuario user, int valor) {
+
+        promptIn("Confirmar Transaccion (Escriba 1 para Confirmar, 0 para Cancelar)");
+        int confirmacion = inputI();
+        salto();
+
+        if (confirmacion == 1) {
+            if (user.getDinero() >= valor) {
+                return 1;
+            } else {
+                return -1;
+            }
+        } else {
+            return 0;
+        }
+    }
 
 
     
