@@ -889,6 +889,160 @@ public class App {
         salto();
         continuar();
     }
+        private static void comprarVuelo(Usuario user) {
+
+        // Solicitar al usuario el origen del vuelo.
+        promptIn("Por favor ingrese el origen: ");
+        String origen = inputS();
+
+        // Solicitar al usuario el destino del vuelo.
+        promptIn("Por favor ingrese el destino: ");
+        String destino = inputS();
+
+        // Ingrese la cantidad de vuelos a generar?
+
+        // Generar una lista de n vuelos con el origen y destino proporcionados.
+        ArrayList<Vuelo> vuelos = Vuelo.generarVuelos(5, origen, destino);
+
+        separador();
+
+        // Mostrar información sobre los vuelos generados.
+        identacion(negrita("Vuelo - Origen - Destino"));
+        salto();
+        for (int i = 0; i < vuelos.size(); i++) {
+            Vuelo vuelo = vuelos.get(i);
+            identacion(vuelo.getInfo(), 2);
+        }
+
+        separador();
+
+        // Solicitar al usuario que seleccione un vuelo y se selecciona.
+        promptIn("Por favor, seleccione el número del vuelo deseado: ");
+        int indexVuelo = inputI();
+        Vuelo vuelo = vuelos.get(indexVuelo);
+
+        // Generar asientos VIP y económicos para el vuelo seleccionado.
+        vuelo.generarAsientos(3, 5, 100);
+
+        // Crear un boleto para el usuario con el origen, destino y vuelo seleccionados.
+        Boleto boleto = new Boleto(origen, destino, user, vuelo);
+        separador();
+
+        // Mostrar los tipos de asientos disponibles y sus precios
+        // System.out.println("Tipos de asientos disponibles:");
+
+        // Mostrar información sobre los asientos disponibles en el vuelo.
+        identacion(negrita(colorTexto("Asientos disponibles", "morado")));
+        salto();
+
+        ArrayList<Asiento> asientos = vuelo.getAsientos();
+
+        for (Asiento asiento : asientos) {
+            identacion(asiento.getInfo(), 2);
+        }
+
+        // Solicitar al usuario que seleccione un número de asiento.
+        salto();
+        promptIn("Por favor, seleccione el número del asiento deseado: ");
+        int indexAsiento = inputI();
+        Asiento asiento = asientos.get(indexAsiento - 1);
+        boleto.setAsiento(asiento);
+
+        // Si se selecciona y es valido se prosigue...
+
+        // Se muestra una previsualizacion del precio
+        separador();
+        System.out.println((negrita("Previsualización del precio: "))
+                + colorTexto(("$" + boleto.getValor()), "verde"));
+        salto();
+        continuar();
+        // Si sí, sigue, sino, selecciona otro asiento??
+
+        separador();
+
+        // Preguntar al usuario si desea añadir equipaje.
+        promptIn("¿Desea añadir equipaje? (Escriba 1 para Sí, 0 para No)");
+        int opcion = inputI();
+
+        if (opcion == 1) {
+            // Cada vez q se agrega un equipaje se va mostrando una previsualizacion del
+            // precio..
+            // Segun la cantidad de equipaje y los precios de cada uni
+            int exit = 1;
+            int c = 0;
+
+            do {
+                c += 1;
+                separador();
+                // Solicitar información sobre el equipaje a agregar.
+
+                promptIn("Peso de la maleta (max 22Kg): ");
+                int peso = inputI();
+
+                promptIn("Ancho de la maleta (max 35cm): ");
+                int ancho = inputI();
+
+                promptIn("Largo de la maleta (max 65cm): ");
+                int largo = inputI();
+
+                promptIn("Alto de la maleta (max 75cm): ");
+                int alto = inputI();
+
+                // Agregar una maleta al boleto y mostrar el nuevo valor del boleto.
+                Maleta maleta = new Maleta(c, peso, largo, ancho, alto);
+                maleta.asignarBoleto(boleto);
+                boleto.addEquipaje(maleta);
+
+                separador();
+
+                System.out.println(negrita(colorTexto("Nuevo valor del boleto:", "morado")));
+                System.out.println((colorTexto("-> $" + boleto.getValor(), "verde")));
+                salto();
+                promptIn("¿Desea agregar otro equipaje o continuar? (1 para Sí, 0 para No)");
+                exit = inputI();
+
+            } while (exit == 1);
+        }
+
+        // Mostrar los detalles de la compra y solicitar confirmación.
+        separadorGrande();
+        promptOut("¿Desea finalizar la compra? Los detalles son los siguientes:");
+        salto();
+
+        identacion(boleto.getInfo());
+        separadorGrande();
+
+        promptIn("Confirmar (Escriba 1 para Confirmar, 0 para Cancelar)");
+        int confirmacion = inputI();
+
+        separadorGrande();
+
+        if (confirmacion == 1) {
+            // Comprobar si el usuario tiene suficiente dinero y, si es así, realizar la
+            // compra.
+            if (user.getDinero() - boleto.getValor() >= 0) {
+                user.comprarBoleto(boleto);
+                boleto.asignarAsiento(asiento);
+
+                System.out.println(negrita(colorTexto("Boleto comprado con éxito.", "verde")));
+                salto();
+                System.out.println(negrita(colorTexto("Informacion y detalles:", "morado")));
+                salto();
+                identacion(boleto.getInfo());
+                salto();
+
+                continuar();
+                // Mostrar los detalles del vuelo
+            } else {
+                salto();
+                System.out.println(colorTexto("Dinero insuficiente. Compra cancelada.", "rojo"));
+                salto();
+            }
+        } else {
+            promptError("Compra cancelada.");
+        }
+
+    }
 
 
     
