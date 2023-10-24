@@ -1,7 +1,17 @@
 package uiMain;
 
+import static uiMain.Estetica.*;
+import gestorAplicacion.Aerolinea.*;
+import gestorAplicacion.Cuenta.*;
+import gestorAplicacion.Descuentos.*;
+import gestorAplicacion.Mascotas.*;
+
+import java.util.Scanner;
+import java.util.ArrayList;
+
 public class App {
 
+    public static GestionUsuario gestionUsuario = new GestionUsuario();
 
     public static void main(String[] args) {
         Usuario user = null; // Variable para almacenar instancia del usuario
@@ -214,7 +224,175 @@ public class App {
         } while (true); // El programa se ejecuta en un bucle infinito
     }
 
-    
+    private static void comprarVuelo(Usuario user) {
+
+        // Solicitar al usuario el origen del vuelo.
+        promptIn("Por favor ingrese el origen: ");
+        String origen = inputS();
+
+        // Solicitar al usuario el destino del vuelo.
+        promptIn("Por favor ingrese el destino: ");
+        String destino = inputS();
+
+        // Ingrese la cantidad de vuelos a generar?
+
+        // Generar una lista de n vuelos con el origen y destino proporcionados.
+        ArrayList<Vuelo> vuelos = Vuelo.generarVuelos(5, origen, destino);
+
+        separador();
+
+        // Mostrar información sobre los vuelos generados.
+        identacion(negrita("Vuelo - Origen - Destino"));
+        salto();
+        for (int i = 0; i < vuelos.size(); i++) {
+            Vuelo vuelo = vuelos.get(i);
+            identacion(vuelo.getInfo(), 2);
+        }
+
+        separador();
+
+        // Solicitar al usuario que seleccione un vuelo y se selecciona.
+        promptIn("Por favor, seleccione el número del vuelo deseado: ");
+        int indexVuelo = inputI();
+        Vuelo vuelo = vuelos.get(indexVuelo);
+
+        // Generar asientos VIP y económicos para el vuelo seleccionado.
+        vuelo.generarAsientos(3, 5, 100);
+
+        // Crear un boleto para el usuario con el origen, destino y vuelo seleccionados.
+        Boleto boleto = new Boleto(origen, destino, user, vuelo);
+        separador();
+
+        // Mostrar los tipos de asientos disponibles y sus precios
+        // System.out.println("Tipos de asientos disponibles:");
+
+        // Mostrar información sobre los asientos disponibles en el vuelo.
+        identacion(negrita(colorTexto("Asientos disponibles", "morado")));
+        salto();
+
+        ArrayList<Asiento> asientos = vuelo.getAsientos();
+
+        for (Asiento asiento : asientos) {
+            identacion(asiento.getInfo(), 2);
+        }
+
+        // Solicitar al usuario que seleccione un número de asiento.
+        salto();
+        promptIn("Por favor, seleccione el número del asiento deseado: ");
+        int indexAsiento = inputI();
+        Asiento asiento = asientos.get(indexAsiento - 1);
+        boleto.setAsiento(asiento);
+
+        // Si se selecciona y es valido se prosigue...
+
+        // Se muestra una previsualizacion del precio
+        separador();
+        System.out.println((negrita("Previsualización del precio: "))
+                + colorTexto(("$" + boleto.getValor()), "verde"));
+        salto();
+        continuar();
+        // Si sí, sigue, sino, selecciona otro asiento??
+
+        separador();
+
+        // Preguntar al usuario si desea añadir equipaje.
+        promptIn("¿Desea añadir equipaje? Tiene derecho a llevar maximo 5 maletas. (1 si / 0 no)");
+        int opcion = inputI();
+
+        int cMaletas = 0;
+
+        if (opcion == 1) {
+            // Cada vez q se agrega un equipaje se va mostrando una previsualizacion del
+            // precio..
+            // Segun la cantidad de equipaje y los precios de cada uni
+            int exit = 1;
+            int c = 0;
+
+            do {
+                c += 1;
+                separador();
+                // Solicitar información sobre el equipaje a agregar.
+
+                promptIn("Peso de la maleta (max 250Kg): ");
+                int peso = inputI();
+
+                promptIn("Ancho de la maleta (max 250cm): ");
+                int ancho = inputI();
+
+                promptIn("Largo de la maleta (max 250cm): ");
+                int largo = inputI();
+
+                promptIn("Alto de la maleta (max 250cm): ");
+                int alto = inputI();
+
+                // Agregar una maleta al boleto y mostrar el nuevo valor del boleto.
+                Maleta maleta = new Maleta(c, peso, largo, ancho, alto);
+                if (maleta.verificarRestricciones()) {
+
+                    maleta.asignarBoleto(boleto);
+                    boleto.addEquipaje(maleta);
+                    cMaletas += 1;
+
+                    separador();
+                    System.out.println(negrita(colorTexto("Nuevo valor del boleto:", "morado")));
+                    System.out.println((colorTexto("-> $" + boleto.getValor(), "verde")));
+                    salto();
+                    promptIn("¿Desea agregar otro equipaje o continuar? (1 para Sí, 0 para No)");
+                    exit = inputI();
+
+                } else {
+                    salto();
+                    promptError("La maleta excede las especificaciones maximas, intente nuevamente");
+                    salto();
+                }
+
+            } while (exit == 1 && cMaletas != 5);
+        }
+
+        salto();
+        printNegrita("Maletas agregadas con exito, cantidad de maletas: " + (boleto.getEquipaje()).size());
+        continuar();
+
+        // Mostrar los detalles de la compra y solicitar confirmación.
+        separadorGrande();
+        promptOut("¿Desea finalizar la compra? Los detalles son los siguientes:");
+        salto();
+
+        identacion(boleto.getInfo());
+        separadorGrande();
+
+        promptIn("Confirmar (Escriba 1 para Confirmar, 0 para Cancelar)");
+        int confirmacion = inputI();
+
+        separadorGrande();
+
+        if (confirmacion == 1) {
+            // Comprobar si el usuario tiene suficiente dinero y, si es así, realizar la
+            // compra.
+            if (user.getDinero() - boleto.getValor() >= 0) {
+                user.comprarBoleto(boleto);
+                boleto.asignarAsiento(asiento);
+
+                System.out.println(negrita(colorTexto("Boleto comprado con éxito.", "verde")));
+                salto();
+                System.out.println(negrita(colorTexto("Informacion y detalles:", "morado")));
+                salto();
+                identacion(boleto.getInfo());
+                salto();
+
+                continuar();
+                // Mostrar los detalles del vuelo
+            } else {
+                salto();
+                System.out.println(colorTexto("Dinero insuficiente. Compra cancelada.", "rojo"));
+                salto();
+            }
+        } else {
+            promptError("Compra cancelada.");
+        }
+
+    }
+
     private static void reasignarVuelo(Usuario user) {
 
         // Obtener el historial de boletos del usuario
@@ -425,7 +603,171 @@ public class App {
 
     }
 
+    private static void cancelarVuelo(Usuario user) {
+        // Mostrar la lista de vuelos
+        // Seleccionar el vuelo
+        // Cancelarlo (Se modifica el boleto y se cambian los valores)
 
+        // Obtener el historial de boletos del usuario
+        ArrayList<Boleto> historial = user.getHistorial();
+
+        identacion(negrita(colorTexto("Información de los vuelos:", "morado")));
+        salto();
+
+        // Iterar a través del historial de boletos
+        for (int i = 0; i < historial.size(); i++) {
+            Boleto boleto = historial.get(i);
+            // Mostrar información de cada boleto en la lista
+            identacion(i + ". " + boleto.getInfo(), 2);
+        }
+
+        separador();
+
+        promptIn("Por favor, seleccione el número del vuelo deseado: ");
+        int indexVuelo = inputI();
+
+        // Obtener el boleto seleccionado por el usuario
+        Boleto boleto = historial.get(indexVuelo);
+
+        separadorGrande();
+        System.out.println(negrita(colorTexto("Vuelo seleccionado, información detallada:", "morado")));
+        salto();
+        identacion(boleto.getInfo());
+
+        separadorGrande();
+
+        if (boleto.getStatus() != "Cancelado") {
+            promptIn("Confirmar la cancelación (Escriba 1 para Confirmar, 0 para Cancelar):");
+            int confirmacion = inputI();
+
+            separadorGrande();
+
+            if (confirmacion == 1) {
+                // Realizar la cancelación del boleto
+                boleto.setStatus("Cancelado");
+                user.cancelarBoleto(boleto);
+                Asiento asiento = boleto.getAsiento();
+                asiento.desasignarBoleto();
+                // Informar al usuario sobre la cancelación exitosa
+                System.out.println(colorTexto("La cancelación se ha realizado con éxito.", "verde"));
+            } else {
+                separador();
+                System.out.println(colorTexto("Proceso cancelado", "rojo"));
+                continuar();
+            }
+        } else {
+            separador();
+            System.out.println(colorTexto("Este vuelo ya fue cancelado", "rojo"));
+            continuar();
+        }
+    }
+
+    private static void gestionCuenta(Usuario user) {
+        ArrayList<Boleto> historial = user.getHistorial(); // Obtiene el historial de boletos del usuario
+
+        int opcion;
+        do {
+            // Muestra un menú para gestionar la cuenta del usuario
+            separadorGrande();
+            promptOut("¿Qué desea hacer?");
+            salto();
+            identacion("1. Ver información de la cuenta");
+            identacion("2. Ver historial de vuelos");
+            identacion("3. Depositar dinero");
+            identacion("4. Canjear millas");
+            identacion("5. Cerrar sesión");
+            identacion("6. Volver al menú anterior");
+            salto();
+
+            // Pide al usuario que seleccione una opción
+            promptIn("> Seleccione una opción (1-6):");
+            opcion = inputI();
+            salto();
+
+            switch (opcion) {
+                case 1:
+                    // Opción 1: Ver información general de la cuenta
+
+                    // Muestra el estado de la cuenta en color morado
+                    separador();
+                    identacion(negrita(colorTexto("Estado de la cuenta", "morado")), 4);
+                    separadorGrande();
+                    System.out.println(user.getInfo()); // Imprime la información de la cuenta
+                    separadorGrande();
+                    continuar();
+                    salto();
+                    break;
+
+                case 2:
+                    // Opción 2: Ver historial de vuelos
+
+                    separador();
+
+                    // Muestra información de los vuelos en color morado
+                    salto();
+                    System.out.println(negrita(colorTexto("Información de los vuelos:", "morado")));
+                    salto();
+
+                    // Itera a través del historial de boletos del usuario
+                    for (int i = 0; i < historial.size(); i++) {
+                        Boleto boleto = historial.get(i); // Obtiene un boleto del historial
+                        // Muestra información de cada boleto en la lista
+                        identacion(i + ". " + boleto.getInfo());
+                    }
+
+                    salto();
+                    continuar();
+                    salto();
+                    break;
+
+                case 3:
+                    // Opción 3: Depositar dinero
+
+                    // Pide al usuario que ingrese la cantidad de dinero que desea depositar
+                    promptOut("Ingrese el valor que desea depositar: ");
+                    int valor = inputI();
+                    user.depositarDinero(valor); // Llama a la función para depositar dinero en la cuenta
+
+                    salto();
+                    System.out.println(colorTexto("Transacción realizada con éxito", "verde")); // Muestra un mensaje de
+                                                                                                // éxito
+                    separador();
+                    break;
+
+                case 4:
+                    // Opción 4: Canjear millas
+
+                    // Llama a la función canjearMillas pasando el objeto de usuario como argumento
+                    canjearMillas(user);
+
+                    salto();
+                    break;
+
+                case 5:
+                    // Opción 5: Cerrar sesión
+
+                    aviso(colorTexto("Cerrando sesión", "rojo")); // Muestra un mensaje de cierre de sesión en rojo
+                    salto();
+                    user = gestionUsuario.cerrarSesion(user); // Llama a la función para cerrar la sesión del usuario
+                    opcion = 6; // Establece la opción en 6 para volver al menú anterior
+                    salto();
+                    break;
+
+                case 6:
+                    // Opción 6: Volver al menú
+
+                    salto();
+                    aviso(colorTexto("¡Volviendo al menú!", "verde")); // Muestra un mensaje de regreso al menú en verde
+                    salto();
+                    break;
+
+                default:
+                    aviso(colorTexto("Opción incorrecta", "rojo")); // Muestra un mensaje de opción incorrecta en rojo
+                    salto();
+                    break;
+            }
+        } while (opcion != 6); // Continúa el bucle hasta que la opción seleccionada sea 6
+    }
 
     private static void checkin(Usuario user) {
         // Mostrar la lista de vuelos
@@ -538,6 +880,65 @@ public class App {
         }
     }
 
+    private static void mejorarAsiento(Boleto boleto) {
+        Asiento asiento = boleto.getAsiento();
+        // se verifica que el asiento sea economico
+        // si es vip ya no se puede mejorar
+        if (asiento.getTipo() == "Economico") {
+            separador();
+            promptIn("Desea mejorar su asiento a VIP?, esto tiene un costo de $25 (1 Si, 0 No)");
+            int confirmacion = inputI();
+
+            if (confirmacion == 1) {
+                // Mejorar asiento
+                salto();
+                System.out.println(negrita(colorTexto("Informacion de su asiento:", "morado")));
+                salto();
+
+                identacion(asiento.getInfo());
+                salto();
+
+                // Hacer asiento vip
+                ArrayList<Asiento> asientos = (boleto.getVuelo()).getAsientos();
+
+                printNegrita(colorTexto("Asientos disponibles", "morado"));
+                salto();
+                for (Asiento asientoTemp : asientos) {
+                    if (asientoTemp.getTipo().equals("Vip")) {
+                        identacion(asientoTemp.getInfo(), 2);
+                    }
+                }
+
+                salto();
+                promptIn("Por favor, seleccione el número del asiento deseado: ");
+                int indexAsiento = inputI();
+
+                // ... Cambiar y reasignar todo
+                Asiento newAsiento = asientos.get(indexAsiento - 1);
+                Usuario user = boleto.getUser();
+
+                if (user.getDinero() >= 25) {
+                    boleto.upgradeAsiento(asiento, newAsiento);
+                    boleto.getUser().realizarPago(25);
+
+                    separador();
+                    printNegrita(colorTexto("Mejora de asiento realizado con exito", "verde"));
+                    salto();
+
+                } else {
+
+                    System.out.println(colorTexto("Dinero insuficiente, mejora cancelada", "rojo"));
+
+                }
+                continuar();
+            }
+        } else {
+            separador();
+            System.out.println(colorTexto("Su asiento ya es VIP", "verde"));
+            separador();
+            continuar();
+        }
+    }
 
     private static void comprarServiciosEspeciales(Boleto boleto, Usuario user) {
 
@@ -790,11 +1191,400 @@ public class App {
 
     }
 
+    private static void contratarAcompanante(Boleto boleto, Usuario user) {
+        promptOut("Desea contratar un acompañante para el pasajero menor de edad? Esto tiene un costo de $15");
 
+        switch (confirmarTransaccion(user, ServiciosEspeciales.ACOMPANANTE_PARA_MENOR.getPrecio())) {
+            case 1:
+                // anade a el servicio a la lista del boleto
+                boleto.anadirServiciosEspeciales(ServiciosEspeciales.ACOMPANANTE_PARA_MENOR);
+                // realiza el pago del servicio
+                boleto.getUser().realizarPago(ServiciosEspeciales.ACOMPANANTE_PARA_MENOR.getPrecio());
 
+                separador();
+                printNegrita(colorTexto("Asignado con exito ✔", "verde"));
+                salto();
+                continuar();
+                break;
 
+            case -1:
+                promptError("Dinero insuficiente, compra cancelada");
+                continuar();
+                break;
 
+            case 0:
+                promptError("Cancelado");
+                continuar();
+                break;
 
+            default:
+                break;
+        }
+    }
+
+    private static void contratarTrasporteTerrestre(Boleto boleto, Usuario user) {
+        promptOut("Desea contratar el servicio de transporte terrestre? Esto tiene un costo de $70");
+
+        switch (confirmarTransaccion(user, ServiciosEspeciales.TRANSPORTE_TERRESTRE.getPrecio())) {
+            case 1:
+                // anade a el servicio a la lista del boleto
+                boleto.anadirServiciosEspeciales(ServiciosEspeciales.TRANSPORTE_TERRESTRE);
+                // realiza el pago del servicio
+                boleto.getUser().realizarPago(ServiciosEspeciales.TRANSPORTE_TERRESTRE.getPrecio());
+
+                separador();
+                printNegrita(colorTexto("Compra realizada con exito!", "verde"));
+                salto();
+                continuar();
+                break;
+
+            case -1:
+                promptError("Dinero insuficiente, compra cancelada");
+                continuar();
+                break;
+
+            case 0:
+                promptError("Cancelado");
+                continuar();
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private static void verServiciosContratados(Boleto boleto) {
+        if (boleto.getServiciosContratados().size() != 0) {
+            System.out.println(colorTexto(("Usted tiene los siguientes servicios contratados"), "morado"));
+            salto();
+            int index = 0;
+            for (ServiciosEspeciales servicio : boleto.getServiciosContratados()) {
+                identacion(negrita("Servicio: ") + servicio.getServicio() + " por un valor de: $"
+                        + colorTexto("" + servicio.getPrecio(), "verde"));
+                if (servicio == ServiciosEspeciales.MASCOTA_EN_CABINA
+                        || servicio == ServiciosEspeciales.MASCOTA_EN_BODEGA) {
+                    System.out.println("	-" + boleto.getMascotas().get(index));
+                    index++;
+                }
+            }
+
+            continuar();
+        } else {
+            System.out.println(colorTexto("No tiene servicios contratados", "morado"));
+
+            continuar();
+        }
+    }
+
+    private static int confirmarTransaccion(Usuario user, int valor) {
+
+        promptIn("Confirmar Transaccion (Escriba 1 para Confirmar, 0 para Cancelar)");
+        int confirmacion = inputI();
+        salto();
+
+        if (confirmacion == 1) {
+            if (user.getDinero() >= valor) {
+                return 1;
+            } else {
+                return -1;
+            }
+        } else {
+            return 0;
+        }
+    }
+
+    private static void canjearMillas(Usuario user) {
+
+        /*
+         * Permite al usuario canjear millas por ciertos descuentos
+         * 
+         * Estructura y proceso:
+         * Se le da a el usuario las opciones disponibles para canjear sus millas
+         * Selecciona la opcion y se pide confirmacion, al confirmar, se descuentan las
+         * millas, se instancia el tipo de descuento
+         * Si el usuario decide aplicar el descuendo instantaneamente se procede a hacer
+         * el proceso
+         * Si no, se guarda el boleto en una lista de descuentos asociada al usuario,
+         * posteriormente el usuario puede aplicar el descuento
+         * usando la opcion 4. Aplicar descuentos
+         */
+        seleccionado("Canjear millas");
+        separadorGrande();
+        identacion("Hola " + colorTexto(user.getNombre(), "verde"), 3);
+        salto();
+
+        int opcion;
+
+        do {
+
+            identacion("En este momento usted posee " + colorTexto("" + user.getMillas(), "morado") + " millas");
+            salto();
+
+            promptOut("Escoja en que desea canjear sus millas");
+            salto();
+
+            // System.out.println("Menu");
+            identacion("1. Mejora de silla" + " (" + upgradeAsiento.costoMillas + ")");
+            identacion("2. Descuento vuelo" + " (" + descuentoVuelo.costoMillas + ")");
+            identacion("3. Descuento maleta" + " (" + descuentoMaleta.costoMillas + ")");
+            identacion("4. Aplicar descuentos");
+            identacion("5. Ver descuentos del usuario");
+            identacion("6. Volver al menú anterior");
+            salto();
+            promptIn("> Seleccione una opción (1-6): ");
+            opcion = inputI();
+
+            separador();
+
+            // Imprimir las opciones
+
+            switch (opcion) {
+                case 1:
+                    switch (verificarMillas(user, upgradeAsiento.costoMillas)) {
+                        case 1:
+                            user.descontarMillas(upgradeAsiento.costoMillas);
+
+                            printNegrita("Canjeado con éxito, millas restantes: "
+                                    + colorTexto("" + user.getMillas(), "verde"));
+                            separador();
+                            promptIn("Desea aplicar el descuendo de una vez? (1 si / 0 no)");
+                            int aplicar = inputI();
+
+                            if (aplicar == 1) {
+                                Descuento descuento = new upgradeAsiento(user);
+                                millasAsiento(user, descuento);
+                            } else {
+                                Descuento descuento = new upgradeAsiento(user);
+                                descuento.guardar();
+                                separador();
+                                printNegrita(colorTexto(
+                                        "Se guardo el descuento en su cuenta, puedes aplicarlo cuando desees",
+                                        "verde"));
+                                salto();
+                                continuar();
+                                separador();
+                            }
+                            break;
+
+                        case -1:
+                            promptError("Millas insuficientes!");
+                            break;
+                        case 0:
+                            promptError("Operacion cancelada");
+                            break;
+                        default:
+                            break;
+                    }
+
+                    break;
+
+                case 2:
+
+                    switch (verificarMillas(user, descuentoVuelo.costoMillas)) {
+
+                        case 1:
+
+                            user.descontarMillas(descuentoVuelo.costoMillas);
+
+                            printNegrita("Canjeado con éxito, millas restantes: "
+                                    + colorTexto("" + user.getMillas(), "verde"));
+                            separador();
+                            promptIn("Desea aplicar el descuendo de una vez? (1 si / 0 no)");
+                            int aplicar = inputI();
+
+                            if (aplicar == 1) {
+                                Descuento descuento = new descuentoVuelo(user);
+                                millasVuelo(user, descuento);
+                            } else {
+                                Descuento descuento = new descuentoVuelo(user);
+                                descuento.guardar();
+                                separador();
+                                printNegrita(colorTexto(
+                                        "Se guardo el descuento en su cuenta, puedes aplicarlo cuando desees",
+                                        "verde"));
+                                salto();
+                                continuar();
+                                separador();
+                            }
+
+                            break;
+
+                        case -1:
+                            promptError("Millas insuficientes!");
+                            break;
+                        case 0:
+                            promptError("Operacion cancelada");
+                            break;
+                        default:
+                            break;
+
+                    }
+                    break;
+
+                case 3:
+                    // Con este cupon se tiene derecho a un % de descuento al del precio TOTAL de
+                    // maletas en un vuelo
+                    // Se puede aplicar directamente aqui (seleccionando un vuelo y recibiendo %) o
+                    // al llamar el check in
+                    switch (verificarMillas(user, descuentoMaleta.costoMillas)) {
+                        case 1:
+
+                            user.descontarMillas(descuentoMaleta.costoMillas);
+                            printNegrita("Canjeado con éxito, millas restantes: "
+                                    + colorTexto("" + user.getMillas(), "verde"));
+                            separador();
+                            promptIn("Desea aplicar el descuendo de una vez? (1 si / 0 no)");
+                            int aplicar = inputI();
+
+                            if (aplicar == 1) {
+
+                                Descuento descuento = new descuentoMaleta(user);
+                                millasMaleta(user, descuento);
+                            } else {
+                                Descuento descuento = new descuentoMaleta(user);
+                                descuento.guardar();
+                                separador();
+                                printNegrita(colorTexto(
+                                        "Se guardo el descuento en su cuenta, puedes aplicarlo cuando desees",
+                                        "verde"));
+                                salto();
+                                continuar();
+                                separador();
+                            }
+                            break;
+
+                        case -1:
+                            promptError("Millas insuficientes!");
+                            break;
+                        case 0:
+                            promptError("Operacion cancelada");
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+
+                case 4:
+                    // Aplicar descuento
+
+                    ArrayList<Descuento> descuentos = verDescuentos(user, 1);
+
+                    separador();
+
+                    // Solicitar al usuario que seleccione un vuelo y se selecciona.
+                    promptIn("Por favor, seleccione el número del descuento deseado: ");
+                    int index = inputI();
+                    Descuento descuento = descuentos.get(index);
+
+                    switch (descuento.getTipo()) {
+                        case "Mejora de asiento":
+                            millasAsiento(user, descuento);
+                            break;
+
+                        case "Descuento Vuelo":
+                            millasVuelo(user, descuento);
+                            break;
+
+                        case "Descuento de maleta":
+                            millasMaleta(user, descuento);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    break;
+
+                case 5:
+                    // Ver descuento
+                    promptIn("Desea ver solo los descuentos disponibles/canjeados o los aplicados tambien (1 / 0)");
+                    int op = inputI();
+                    verDescuentos(user, op);
+                    salto();
+                    continuar();
+                    break;
+
+                case 6:
+                    aviso(colorTexto("Volviendo al menu", "rojo"));
+                    separador();
+                    break;
+
+                default:
+                    aviso(colorTexto("Opción incorrecta", "rojo"));
+                    break;
+            }
+
+            separadorGrande();
+
+        } while (opcion != 6);
+    }
+
+    private static void millasAsiento(Usuario user, Descuento descuento) {
+
+        Boleto boleto = selecBoleto(user);
+        Asiento asiento = boleto.getAsiento();
+        // se verifica que el asiento sea economico
+        // si es vip ya no se puede mejorar
+
+        if (asiento.getTipo() == "Economico") {
+
+            // Hacer asiento vip
+            ArrayList<Asiento> asientos = (boleto.getVuelo()).getAsientos();
+
+            printNegrita(colorTexto("Asientos disponibles", "morado"));
+            salto();
+            for (Asiento asientoTemp : asientos) {
+                if (asientoTemp.getTipo().equals("Vip")) {
+                    identacion(asientoTemp.getInfo(), 2);
+                }
+            }
+
+            salto();
+            promptIn("Por favor, seleccione el número del asiento deseado: ");
+            int indexAsiento = inputI();
+
+            // ... Cambiar y reasignar todo
+            Asiento newAsiento = asientos.get(indexAsiento - 1);
+            boleto.upgradeAsientoMillas(asiento, newAsiento);
+            descuento.aplicarDescuento(boleto);
+
+            separador();
+            printNegrita(colorTexto("Mejora de asiento realizado con exito", "verde"));
+            salto();
+
+            printNegrita(colorTexto("Detalles del nuevo asiento:", "morado"));
+            salto();
+            identacion((boleto.getAsiento()).getInfo());
+            salto();
+            continuar();
+
+        } else {
+
+            descuento.guardar();
+
+            separador();
+            printNegrita(colorTexto(
+                    "Su asiento ya es VIP, se guardo el descuento en su cuenta", "verde"));
+            salto();
+            continuar();
+            separador();
+
+        }
+
+    }
+
+    private static void millasVuelo(Usuario user, Descuento descuento) {
+        Boleto boleto = selecBoleto(user);
+        descuento.aplicarDescuento(boleto);
+
+        // Listo, su costo de maleta ha sdo reducido en un % y se ha regresado el dinero
+        printNegrita(colorTexto("Se ha aplicado un " +
+                descuentoVuelo.descuento + "% de descuento en el valor de su vuelo, ahorro de: "
+                + ("$" + ((int) (boleto.getValorInicial() * (0.2)))), "verde"));
+
+        salto();
+        continuar();
+    }
 
     private static ArrayList<Descuento> verDescuentos(Usuario user, int op) {
 
@@ -889,363 +1679,5 @@ public class App {
         salto();
         continuar();
     }
-        private static void comprarVuelo(Usuario user) {
-
-        // Solicitar al usuario el origen del vuelo.
-        promptIn("Por favor ingrese el origen: ");
-        String origen = inputS();
-
-        // Solicitar al usuario el destino del vuelo.
-        promptIn("Por favor ingrese el destino: ");
-        String destino = inputS();
-
-        // Ingrese la cantidad de vuelos a generar?
-
-        // Generar una lista de n vuelos con el origen y destino proporcionados.
-        ArrayList<Vuelo> vuelos = Vuelo.generarVuelos(5, origen, destino);
-
-        separador();
-
-        // Mostrar información sobre los vuelos generados.
-        identacion(negrita("Vuelo - Origen - Destino"));
-        salto();
-        for (int i = 0; i < vuelos.size(); i++) {
-            Vuelo vuelo = vuelos.get(i);
-            identacion(vuelo.getInfo(), 2);
-        }
-
-        separador();
-
-        // Solicitar al usuario que seleccione un vuelo y se selecciona.
-        promptIn("Por favor, seleccione el número del vuelo deseado: ");
-        int indexVuelo = inputI();
-        Vuelo vuelo = vuelos.get(indexVuelo);
-
-        // Generar asientos VIP y económicos para el vuelo seleccionado.
-        vuelo.generarAsientos(3, 5, 100);
-
-        // Crear un boleto para el usuario con el origen, destino y vuelo seleccionados.
-        Boleto boleto = new Boleto(origen, destino, user, vuelo);
-        separador();
-
-        // Mostrar los tipos de asientos disponibles y sus precios
-        // System.out.println("Tipos de asientos disponibles:");
-
-        // Mostrar información sobre los asientos disponibles en el vuelo.
-        identacion(negrita(colorTexto("Asientos disponibles", "morado")));
-        salto();
-
-        ArrayList<Asiento> asientos = vuelo.getAsientos();
-
-        for (Asiento asiento : asientos) {
-            identacion(asiento.getInfo(), 2);
-        }
-
-        // Solicitar al usuario que seleccione un número de asiento.
-        salto();
-        promptIn("Por favor, seleccione el número del asiento deseado: ");
-        int indexAsiento = inputI();
-        Asiento asiento = asientos.get(indexAsiento - 1);
-        boleto.setAsiento(asiento);
-
-        // Si se selecciona y es valido se prosigue...
-
-        // Se muestra una previsualizacion del precio
-        separador();
-        System.out.println((negrita("Previsualización del precio: "))
-                + colorTexto(("$" + boleto.getValor()), "verde"));
-        salto();
-        continuar();
-        // Si sí, sigue, sino, selecciona otro asiento??
-
-        separador();
-
-        // Preguntar al usuario si desea añadir equipaje.
-        promptIn("¿Desea añadir equipaje? (Escriba 1 para Sí, 0 para No)");
-        int opcion = inputI();
-
-        if (opcion == 1) {
-            // Cada vez q se agrega un equipaje se va mostrando una previsualizacion del
-            // precio..
-            // Segun la cantidad de equipaje y los precios de cada uni
-            int exit = 1;
-            int c = 0;
-
-            do {
-                c += 1;
-                separador();
-                // Solicitar información sobre el equipaje a agregar.
-
-                promptIn("Peso de la maleta (max 22Kg): ");
-                int peso = inputI();
-
-                promptIn("Ancho de la maleta (max 35cm): ");
-                int ancho = inputI();
-
-                promptIn("Largo de la maleta (max 65cm): ");
-                int largo = inputI();
-
-                promptIn("Alto de la maleta (max 75cm): ");
-                int alto = inputI();
-
-                // Agregar una maleta al boleto y mostrar el nuevo valor del boleto.
-                Maleta maleta = new Maleta(c, peso, largo, ancho, alto);
-                maleta.asignarBoleto(boleto);
-                boleto.addEquipaje(maleta);
-
-                separador();
-
-                System.out.println(negrita(colorTexto("Nuevo valor del boleto:", "morado")));
-                System.out.println((colorTexto("-> $" + boleto.getValor(), "verde")));
-                salto();
-                promptIn("¿Desea agregar otro equipaje o continuar? (1 para Sí, 0 para No)");
-                exit = inputI();
-
-            } while (exit == 1);
-        }
-
-        // Mostrar los detalles de la compra y solicitar confirmación.
-        separadorGrande();
-        promptOut("¿Desea finalizar la compra? Los detalles son los siguientes:");
-        salto();
-
-        identacion(boleto.getInfo());
-        separadorGrande();
-
-        promptIn("Confirmar (Escriba 1 para Confirmar, 0 para Cancelar)");
-        int confirmacion = inputI();
-
-        separadorGrande();
-
-        if (confirmacion == 1) {
-            // Comprobar si el usuario tiene suficiente dinero y, si es así, realizar la
-            // compra.
-            if (user.getDinero() - boleto.getValor() >= 0) {
-                user.comprarBoleto(boleto);
-                boleto.asignarAsiento(asiento);
-
-                System.out.println(negrita(colorTexto("Boleto comprado con éxito.", "verde")));
-                salto();
-                System.out.println(negrita(colorTexto("Informacion y detalles:", "morado")));
-                salto();
-                identacion(boleto.getInfo());
-                salto();
-
-                continuar();
-                // Mostrar los detalles del vuelo
-            } else {
-                salto();
-                System.out.println(colorTexto("Dinero insuficiente. Compra cancelada.", "rojo"));
-                salto();
-            }
-        } else {
-            promptError("Compra cancelada.");
-        }
-            
-    }
-        private static void gestionCuenta(Usuario user) {
-        ArrayList<Boleto> historial = user.getHistorial();
-
-        int opcion;
-        do {
-
-            // Ver cuenta.
-            separadorGrande();
-
-            promptOut("¿Qué desea hacer?");
-            salto();
-
-            // System.out.println("Menu");
-            identacion("1. Ver informacion de la cuenta");
-            identacion("2. Ver historial de vuelos");
-            identacion("3. Depositar dinero");
-            identacion("4. Canjear millas");
-            identacion("5. Cerrar sesión");
-            identacion("6. Volver al menú anterior");
-            salto();
-
-            promptIn("> Seleccione una opción (1-6):");
-            opcion = inputI();
-            salto();
-
-            // Imprimir las opciones
-
-            switch (opcion) {
-                case 1:
-                    // Ver informacion general de la cuenta
-                    separador();
-                    identacion(negrita(colorTexto("Estado de la cuenta", "morado")), 4);
-                    separadorGrande();
-                    System.out.println(user.getInfo());
-                    separadorGrande();
-                    continuar();
-                    salto();
-                    break;
-
-                case 2:
-                    separador();
-                    // Ver historial de vuelos y visualizar informacion (Casi Listo)
-                    salto();
-
-                    System.out.println(negrita(colorTexto("Información de los vuelos:", "morado")));
-                    salto();
-
-                    // Iterar a través del historial de boletos
-                    for (int i = 0; i < historial.size(); i++) {
-                        Boleto boleto = historial.get(i);
-                        // Mostrar información de cada boleto en la lista
-                        identacion(i + ". " + boleto.getInfo());
-                    }
-
-                    salto();
-                    continuar();
-                    salto();
-
-                    break;
-
-                case 3:
-                    // Depositar dinero
-                    promptOut("Ingrese el valor que desea depositar: ");
-                    int valor = inputI();
-                    user.depositarDinero(valor);
-
-                    salto();
-                    System.out.println(colorTexto("Transaccion realizada con exito", "verde"));
-
-                    separador();
-                    break;
-
-                case 4:
-                    // Canjear millas
-                    canjearMillas(user);
-
-                    salto();
-                    break;
-
-                case 5:
-                    // Cerrar sesion (Listo)
-                    aviso(colorTexto("Cerrando sesión", "rojo"));
-                    salto();
-                    user = gestionUsuario.cerrarSesion(user);
-                    opcion = 6;
-                    salto();
-                    break;
-
-                case 6:
-                    // Volver al menu (Listo)
-                    salto();
-                    aviso(colorTexto("¡Volviendo al menu!", "verde"));
-                    salto();
-                    break;
-
-                default:
-                    aviso(colorTexto("Opción incorrecta", "rojo"));
-                    salto();
-
-                    break;
-            }
-
-        } while (opcion != 6);
-    }
-       private static void contratarAcompanante(Boleto boleto, Usuario user) {
-        promptOut("Desea contratar un acompañante para el pasajero menor de edad? Esto tiene un costo de $15");
-
-        switch (confirmarTransaccion(user, ServiciosEspeciales.ACOMPANANTE_PARA_MENOR.getPrecio())) {
-            case 1:
-                // anade a el servicio a la lista del boleto
-                boleto.anadirServiciosEspeciales(ServiciosEspeciales.ACOMPANANTE_PARA_MENOR);
-                // realiza el pago del servicio
-                boleto.getUser().realizarPago(ServiciosEspeciales.ACOMPANANTE_PARA_MENOR.getPrecio());
-
-                separador();
-                printNegrita(colorTexto("Asignado con exito ✔", "verde"));
-                salto();
-                continuar();
-                break;
-
-            case -1:
-                promptError("Dinero insuficiente, compra cancelada");
-                break;
-
-            case 0:
-                promptError("Cancelado");
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    private static void contratarTrasporteTerrestre(Boleto boleto, Usuario user) {
-        promptOut("Desea contratar el servicio de transporte terrestre? Esto tiene un costo de $70");
-
-        switch (confirmarTransaccion(user, ServiciosEspeciales.TRANSPORTE_TERRESTRE.getPrecio())) {
-            case 1:
-                // anade a el servicio a la lista del boleto
-                boleto.anadirServiciosEspeciales(ServiciosEspeciales.TRANSPORTE_TERRESTRE);
-                // realiza el pago del servicio
-                boleto.getUser().realizarPago(ServiciosEspeciales.TRANSPORTE_TERRESTRE.getPrecio());
-
-                separador();
-                printNegrita(colorTexto("Compra realizada con exito!", "verde"));
-                salto();
-                continuar();
-                break;
-
-            case -1:
-                promptError("Dinero insuficiente, compra cancelada");
-                break;
-
-            case 0:
-                promptError("Cancelado");
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    private static void verServiciosContratados(Boleto boleto) {
-        if (boleto.getServiciosContratados().size() != 0) {
-            System.out.println(colorTexto(("Usted tiene los siguientes servicios contratados"), "morado"));
-            salto();
-            int index = 0;
-            for (ServiciosEspeciales servicio : boleto.getServiciosContratados()) {
-                identacion(negrita("Servicio: ") + servicio.getServicio() + " por un valor de: $"
-                        + colorTexto("" + servicio.getPrecio(), "verde"));
-                if (servicio == ServiciosEspeciales.MASCOTA_EN_CABINA
-                        || servicio == ServiciosEspeciales.MASCOTA_EN_BODEGA) {
-                    System.out.println("	-" + boleto.getMascotas().get(index));
-                }
-            }
-
-            continuar();
-        } else {
-            System.out.println(colorTexto("No tiene servicios contratados", "morado"));
-
-            continuar();
-        }
-    }
-
-    private static int confirmarTransaccion(Usuario user, int valor) {
-
-        promptIn("Confirmar Transaccion (Escriba 1 para Confirmar, 0 para Cancelar)");
-        int confirmacion = inputI();
-        salto();
-
-        if (confirmacion == 1) {
-            if (user.getDinero() >= valor) {
-                return 1;
-            } else {
-                return -1;
-            }
-        } else {
-            return 0;
-        }
-    }
-
-
-    
-
 
 }
