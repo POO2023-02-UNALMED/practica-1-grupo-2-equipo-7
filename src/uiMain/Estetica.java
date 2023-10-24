@@ -149,6 +149,6 @@ public class Estetica {
 
     // Función para mostrar un mensaje de selección en color morado
     public static void seleccionado(String text) {
-        System.out.println(negrita(colorTexto((" - - - > Seleccion: " + text + " < - - -"), "morado"));
+        System.out.println(negrita(colorTexto((" - - - > Seleccion: " + text + " < - - -"), "morado")));
     }
 }
