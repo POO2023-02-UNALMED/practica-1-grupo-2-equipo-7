@@ -426,4 +426,117 @@ public class App {
     }
 
 
+
+    private static void checkin(Usuario user) {
+        // Mostrar la lista de vuelos
+        // Seleccionar el vuelo
+        // Cancelarlo (Se modifica el boleto y se cambian los valores)
+
+        // Obtener el historial de boletos del usuario
+        ArrayList<Boleto> historial = user.getHistorial();
+
+        System.out.println(colorTexto("Información de los vuelos:", "morado"));
+        salto();
+
+        // Iterar a través del historial de boletos
+        for (int i = 0; i < historial.size(); i++) {
+            Boleto boleto = historial.get(i);
+            // Mostrar información de cada boleto en la lista
+            identacion(i + ". " + boleto.getInfo());
+        }
+        salto();
+
+        promptIn("Por favor, seleccione el número del vuelo deseado:");
+        int indexVuelo = inputI();
+
+        // Obtener el boleto seleccionado por el usuario
+        Boleto boleto = historial.get(indexVuelo);
+
+        separador();
+
+        System.out.println(colorTexto("Vuelo seleccionado, información detallada:", "morado"));
+        salto();
+        identacion(boleto.getInfo());
+
+        salto();
+        continuar();
+
+        int opcion;
+        // verifica si ya se realizo el checkin para el vuelo
+        // en caso de que ya se realizo el check in no dejaria entrar a este menu
+        if (!boleto.getCheckInRealizado() && boleto.getStatus() != "Cancelado") {
+            do {
+                separadorGrande();
+
+                // muestra el menu del check in
+                identacion(negrita(colorTexto("Bienvenido al sistema de check-in del vuelo", "morado")), 3);
+
+                salto();
+                identacion("1. Realizar check-in");
+                identacion("2. Mejorar asiento");
+                identacion("3. Comprar servicios especiales");
+                identacion("4. Volver al menú anterior");
+                salto();
+
+                promptIn("> Seleccione una opción (1-4): ");
+                opcion = inputI();
+
+                switch (opcion) {
+
+                    case 1:
+                        // realizar el check in
+                        salto();
+                        promptIn("Confirma el check-in? (Escriba 1 para Confirmar, 0 para Cancelar):");
+                        int confirmacion = inputI();
+
+                        separador();
+
+                        if (confirmacion == 1) {
+                            boleto.setStatus("Confirmado");
+                            boleto.setCheckInRealizado(true);
+                            System.out.println(colorTexto("CheckIn Realizado con éxito.", "verde"));
+                        } else {
+                            System.out.println(colorTexto("Proceso cancelado.", "rojo"));
+                        }
+                        continuar();
+                        break;
+
+                    case 2:
+                        mejorarAsiento(boleto);
+                        break;
+
+                    case 3:
+                        comprarServiciosEspeciales(boleto, user);
+                        break;
+
+                    case 4:
+                        // Volver al menu (Listo)
+                        salto();
+                        aviso("¡Volviendo al menu!");
+                        salto();
+                        break;
+
+                    default:
+
+                        aviso(colorTexto("Opción incorrecta", "rojo"));
+                        break;
+
+                }
+
+            } while (opcion != 4 && !boleto.getCheckInRealizado());
+        } else {
+            if (boleto.getStatus() == "Cancelado") {
+                separador();
+                System.out
+                        .println(colorTexto("No es posible realizar el checkIn ya que el vuelo fue cancelado", "rojo"));
+                continuar();
+            } else {
+                separador();
+                System.out.println(colorTexto("Usted ya realizo el Check-in para este vuelo", "rojo"));
+                continuar();
+            }
+        }
+    }
+
+
 }
