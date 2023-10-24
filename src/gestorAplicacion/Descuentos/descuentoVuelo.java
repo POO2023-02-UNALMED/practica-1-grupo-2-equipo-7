@@ -52,3 +52,4 @@ public class descuentoVuelo extends Descuento implements Serializable {
         this.usar(); // Marcar el descuento como usado
     }
 }
+

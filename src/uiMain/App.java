@@ -14,7 +14,6 @@ public class App {
     public static GestionUsuario gestionUsuario = new GestionUsuario();
 
     public static void main(String[] args) {
-
         Usuario user = null; // Variable para almacenar instancia del usuario
         int opcion = 0; // Variable para almacenar la opción seleccionada
 
